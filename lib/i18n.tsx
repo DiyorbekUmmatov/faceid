@@ -134,18 +134,20 @@ const translations: Record<string, Record<string, string>> = {
   },
 };
 
-// Create context for translations
-export const I18nContext = createContext<{
+type I18nContextType = {
   language: keyof typeof translations;
   changeLanguage: (lang: keyof typeof translations) => void;
   t: (key: string, vars?: { [key: string]: string | number }) => string;
-}>({
+};
+
+const defaultContext: I18nContextType = {
   language: "en",
   changeLanguage: () => {},
   t: (key) => key,
-});
+};
 
-// Provider component
+export const I18nContext = createContext<I18nContextType>(defaultContext);
+
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<keyof typeof translations>("en");
 
@@ -179,16 +181,17 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     return translation;
   };
 
-  const value = {
+  const contextValue: I18nContextType = {
     language,
     changeLanguage,
     t,
   };
 
-  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+  return (
+    <I18nContext.Provider value={contextValue}>{children}</I18nContext.Provider>
+  );
 }
 
-// Hook for using translations
 export function useTranslation() {
   const [locale, setLocale] = useState("en");
 
